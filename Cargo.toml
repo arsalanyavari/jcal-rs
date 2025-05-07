@@ -1,0 +1,23 @@
+[package]
+name        = "jcal_lib"
+version     = "0.1.0"
+edition     = "2021"
+license     = "MIT"
+authors     = ["Amir Arsalan Yavari"]
+
+[lib]
+name = "jcal_lib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "jcal"
+path = "src/bin/jcal.rs"
+
+[[bin]]
+name = "jdate"
+path = "src/bin/jdate.rs"
+
+[dependencies]
+clap   = { version = "4.5", features = ["derive"] }
+chrono = "0.4"
+colored = "3.0.0"
