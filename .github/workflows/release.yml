@@ -1,0 +1,113 @@
+name: Release Build
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  build-linux:
+    name: Build for Linux (x86_64, ARM64)
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        platform: [x86_64-unknown-linux-gnu, aarch64-unknown-linux-gnu]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform }}
+
+      - name: Install Dependencies for Linux ARM
+        if: matrix.platform == 'aarch64-unknown-linux-gnu'
+        run: sudo apt update && sudo apt install -y gcc-aarch64-linux-gnu
+
+      - name: Set up Cargo for Linux ARM
+        if: matrix.platform == 'aarch64-unknown-linux-gnu'
+        run: |
+          mkdir -p ~/.cargo
+          echo '[target.aarch64-unknown-linux-gnu]' >> ~/.cargo/config.toml
+          echo 'linker = "aarch64-linux-gnu-gcc"' >> ~/.cargo/config.toml
+
+      - name: Build and Package
+        run: |
+          cargo build --target ${{ matrix.platform }} --release
+          cd target/${{ matrix.platform }}/release/
+          rm -rf $(ls | grep -v -E '^(jcal|jdate)$')
+          zip -r ${{ matrix.platform }}.zip ./*
+
+      - name: Upload File to Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.platform }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-windows:
+    name: Build for Windows (x86_64)
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        platform: [x86_64-pc-windows-gnu]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform }}
+
+      - name: Build and Package
+        run: |
+          cargo build --target ${{ matrix.platform }} --release
+          cd target/${{ matrix.platform }}/release/
+          Remove-Item -Recurse -Force $(Get-ChildItem | Where-Object { $_.Name -notin @("jcal", "jdate") })
+          Compress-Archive -Path ./* -DestinationPath ${{ matrix.platform }}.zip -Force
+        env:
+          RUSTFLAGS: "-C target-feature=+crt-static"
+
+      - name: Upload File to Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.platform }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-macos:
+    name: Build for macOS (x86_64, ARM64)
+    runs-on: macos-latest
+
+    strategy:
+      matrix:
+        platform: [x86_64-apple-darwin, aarch64-apple-darwin]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform }}
+
+      - name: Build and Package
+        run: |
+          cargo build --target ${{ matrix.platform }} --release
+          cd target/${{ matrix.platform }}/release/
+          rm -rf $(ls | grep -v -E '^(jcal|jdate)$')
+          zip -r ${{ matrix.platform }}.zip target/${{ matrix.platform }}
+
+      - name: Upload File to Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.platform }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
