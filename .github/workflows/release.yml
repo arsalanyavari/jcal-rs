@@ -103,7 +103,7 @@ jobs:
           cargo build --target ${{ matrix.platform }} --release
           cd target/${{ matrix.platform }}/release/
           rm -rf $(ls | grep -v -E '^(jcal|jdate)$')
-          zip -r ${{ matrix.platform }}.zip target/${{ matrix.platform }}
+          zip -r ${{ matrix.platform }}.zip ./*
 
       - name: Upload File to Assets
         uses: softprops/action-gh-release@v2
