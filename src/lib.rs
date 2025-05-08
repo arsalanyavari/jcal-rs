@@ -153,19 +153,26 @@ fn compute_jdn_internal(year: i32, month: u32, day: u32) -> i64 {
 
 fn jalali_yday_to_month_day_internal(year: i32, yday: i32) -> (u8, u8) {
     let mut p_day_in_year = yday + 1;
-    let mut current_month_0_indexed = 0;
+    let mut calculated_month_1_indexed: u8 = 0; // Will store the 1-indexed month. Default to 0 to indicate not found yet.
 
-    for m_idx in 0..11 {
-        let current_month_1_indexed = (m_idx + 1) as u8;
-        let days_in_m = days_in_month(year, current_month_1_indexed) as i32;
-        if p_day_in_year > days_in_m {
-            p_day_in_year -= days_in_m;
+    // The range 1..LAST_MONTH_INDEX covers 1, 2, ..., 11.
+    for current_month_1_indexed_iter in 1..LAST_MONTH_INDEX {
+        let days_in_current_month = days_in_month(year, current_month_1_indexed_iter) as i32;
+        if p_day_in_year > days_in_current_month {
+            p_day_in_year -= days_in_current_month;
         } else {
-            current_month_0_indexed = m_idx;
+            // Day falls into this month
+            calculated_month_1_indexed = current_month_1_indexed_iter;
             break;
         }
     }
-    ((current_month_0_indexed + 1) as u8, p_day_in_year as u8)
+
+    // calculated_month_1_indexed is still 0, day is in the last month
+    if calculated_month_1_indexed == 0 {
+        calculated_month_1_indexed = LAST_MONTH_INDEX;
+    }
+
+    (calculated_month_1_indexed, p_day_in_year as u8)
 }
 
 fn days_offset_to_jalali_internal(days_offset_from_unix_epoch: i64) -> (i32, u8, u8) {
