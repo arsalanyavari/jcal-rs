@@ -244,3 +244,155 @@ pub fn first_weekday(jy: i32, jm: u8) -> Option<u8> {
         None => None,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_is_leap() {
+        assert!(is_leap(1399), "Year 1399 should be a leap year");
+        assert!(!is_leap(1400), "Year 1400 should not be a leap year");
+        assert!(is_leap(1395), "Year 1395 should be a leap year");
+        assert!(!is_leap(1398), "Year 1398 should not be a leap year");
+        assert!(is_leap(1403), "Year 1403 should be a leap year");
+    }
+
+    #[test]
+    fn test_days_in_month() {
+        // Test 31-day months
+        assert_eq!(
+            days_in_month(1399, 1),
+            31,
+            "Farvardin (1) should have 31 days"
+        );
+        assert_eq!(
+            days_in_month(1399, 6),
+            31,
+            "Shahrivar (6) should have 31 days"
+        );
+
+        // Test 30-day months
+        assert_eq!(days_in_month(1399, 7), 30, "Mehr (7) should have 30 days");
+        assert_eq!(
+            days_in_month(1399, 11),
+            30,
+            "Bahman (11) should have 30 days"
+        );
+
+        // Test Esfand in a non-leap year
+        assert_eq!(
+            days_in_month(1400, 12),
+            29,
+            "Esfand (12) in non-leap year 1400 should have 29 days"
+        );
+
+        // Test Esfand in a leap year
+        assert_eq!(
+            days_in_month(1399, 12),
+            30,
+            "Esfand (12) in leap year 1399 should have 30 days"
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_days_in_month_invalid_month_low() {
+        days_in_month(1399, 0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_days_in_month_invalid_month_high() {
+        days_in_month(1399, 13);
+    }
+
+    #[test]
+    fn test_jalali_to_gregorian() {
+        // Test case 1: Start of a leap year
+        assert_eq!(jalali_to_gregorian(1399, 1, 1), (2020, 3, 20));
+        // Test case 2: End of Esfand in a leap year
+        assert_eq!(jalali_to_gregorian(1399, 12, 30), (2021, 3, 20));
+        // Test case 3: Start of a non-leap year
+        assert_eq!(jalali_to_gregorian(1400, 1, 1), (2021, 3, 21));
+        // Test case 4: End of Esfand in a non-leap year
+        assert_eq!(jalali_to_gregorian(1400, 12, 29), (2022, 3, 20));
+        // Test case 5: A random date
+        assert_eq!(jalali_to_gregorian(1370, 5, 15), (1991, 8, 6));
+    }
+
+    #[test]
+    fn test_gregorian_to_jalali() {
+        // Test case 1
+        assert_eq!(gregorian_to_jalali(2020, 3, 20), (1399, 1, 1));
+        // Test case 2
+        assert_eq!(gregorian_to_jalali(2021, 3, 20), (1399, 12, 30));
+        // Test case 3
+        assert_eq!(gregorian_to_jalali(2021, 3, 21), (1400, 1, 1));
+        // Test case 4
+        assert_eq!(gregorian_to_jalali(2022, 3, 20), (1400, 12, 29));
+        // Test case 5
+        assert_eq!(gregorian_to_jalali(1991, 8, 6), (1370, 5, 15));
+        // Test Yalda night (longest night of the year)
+        assert_eq!(gregorian_to_jalali(2023, 12, 21), (1402, 9, 30));
+    }
+
+    #[test]
+    fn test_round_trip_jalali_to_gregorian_to_jalali() {
+        let original_j_date = (1399, 6, 15); // A sample Jalali date
+        let g_date = jalali_to_gregorian(original_j_date.0, original_j_date.1, original_j_date.2);
+        let final_j_date = gregorian_to_jalali(g_date.0, g_date.1, g_date.2);
+        assert_eq!(
+            original_j_date, final_j_date,
+            "Jalali -> Gregorian -> Jalali round trip failed"
+        );
+
+        let original_j_date_leap_end = (1399, 12, 30);
+        let g_date_leap_end = jalali_to_gregorian(
+            original_j_date_leap_end.0,
+            original_j_date_leap_end.1,
+            original_j_date_leap_end.2,
+        );
+        let final_j_date_leap_end =
+            gregorian_to_jalali(g_date_leap_end.0, g_date_leap_end.1, g_date_leap_end.2);
+        assert_eq!(
+            original_j_date_leap_end, final_j_date_leap_end,
+            "Jalali -> Gregorian -> Jalali round trip failed for end of leap Esfand"
+        );
+    }
+
+    #[test]
+    fn test_round_trip_gregorian_to_jalali_to_gregorian() {
+        let original_g_date = (2023, 10, 26); // A sample Gregorian date
+        let j_date = gregorian_to_jalali(original_g_date.0, original_g_date.1, original_g_date.2);
+        let final_g_date = jalali_to_gregorian(j_date.0, j_date.1, j_date.2);
+        assert_eq!(
+            original_g_date, final_g_date,
+            "Gregorian -> Jalali -> Gregorian round trip failed"
+        );
+
+        let original_g_date_leap = (2020, 2, 29); // Gregorian leap day
+        let j_date_leap = gregorian_to_jalali(
+            original_g_date_leap.0,
+            original_g_date_leap.1,
+            original_g_date_leap.2,
+        );
+        let final_g_date_leap = jalali_to_gregorian(j_date_leap.0, j_date_leap.1, j_date_leap.2);
+        assert_eq!(
+            original_g_date_leap, final_g_date_leap,
+            "Gregorian -> Jalali -> Gregorian round trip failed for Gregorian leap day"
+        );
+    }
+
+    #[test]
+    fn test_first_weekday() {
+        // 1 Farvardin 1399 was a Friday. (Saturday=0, ..., Friday=6)
+        assert_eq!(first_weekday(1399, 1), Some(6));
+        // 1 Farvardin 1400 was a Sunday.
+        assert_eq!(first_weekday(1400, 1), Some(1));
+        // 1 Mehr 1399 was a Wednesday.
+        assert_eq!(first_weekday(1399, 7), Some(3));
+        // 1 Dey 1402 was a Friday
+        assert_eq!(first_weekday(1402, 10), Some(6));
+    }
+}
