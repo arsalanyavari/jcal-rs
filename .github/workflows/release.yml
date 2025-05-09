@@ -42,7 +42,7 @@ jobs:
           zip -r ${{ matrix.platform }}.zip ./*
 
       - name: Upload File to Assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v1
         with:
           files: ${{ matrix.platform }}.zip
         env:
@@ -75,7 +75,7 @@ jobs:
           RUSTFLAGS: "-C target-feature=+crt-static"
 
       - name: Upload File to Assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v1
         with:
           files: ${{ matrix.platform }}.zip
         env:
@@ -106,7 +106,7 @@ jobs:
           zip -r ${{ matrix.platform }}.zip ./*
 
       - name: Upload File to Assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v1
         with:
           files: ${{ matrix.platform }}.zip
         env:

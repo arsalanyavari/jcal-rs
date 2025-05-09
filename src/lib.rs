@@ -54,6 +54,53 @@ pub const MONTH_NAMES: [&str; 12] = [
 
 pub const WEEK_DAYS_AB: [&str; 7] = ["Sh", "Ye", "Do", "Se", "Ch", "Pa", "Jo"];
 
+pub const PERSIAN_MONTH_NAMES: [&str; 12] = [
+    "فروردین",
+    "اردیبهشت",
+    "خرداد",
+    "تیر",
+    "مرداد",
+    "شهریور",
+    "مهر",
+    "آبان",
+    "آذر",
+    "دی",
+    "بهمن",
+    "اسفند",
+];
+
+pub const PERSIAN_WEEK_DAYS_AB: [&str; 7] = ["شن", "یک", "دو", "سه", "چا", "پن", "جم"];
+
+pub const ENGLISH_WEEK_DAYS_AB: [&str; 7] = ["Sa", "Su", "Mo", "Tu", "We", "Th", "Fr"];
+
+pub fn to_persian_numerals(input: &str) -> String {
+    input
+        .chars()
+        .map(|c| match c {
+            '0' => '۰',
+            '1' => '۱',
+            '2' => '۲',
+            '3' => '۳',
+            '4' => '۴',
+            '5' => '۵',
+            '6' => '۶',
+            '7' => '۷',
+            '8' => '۸',
+            '9' => '۹',
+            _ => c,
+        })
+        .collect()
+}
+
+pub fn jalali_day_of_year(jy: i32, jm: u8, jd: u8) -> i32 {
+    let mut day_of_year: i32 = 0;
+    for m_iter in 1..jm {
+        day_of_year += days_in_month(jy, m_iter) as i32;
+    }
+    day_of_year += jd as i32;
+    day_of_year
+}
+
 // Chekc the Jalali year is leap or not
 pub fn is_leap(jy: i32) -> bool {
     if jy <= 5 {
