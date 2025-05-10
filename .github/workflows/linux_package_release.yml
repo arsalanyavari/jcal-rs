@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
-        platform: [ubuntu-latest, ubuntu-22.04-arm64]
+        platform: [ubuntu-latest, ubuntu-22.04-arm]
         include:
           - platform: ubuntu-latest
             deb_arch: amd64
@@ -38,11 +38,7 @@ jobs:
           sudo gem install fpm --no-document
 
       - name: Build binaries
-        run: |
-          cargo build --release --target ${{ matrix.target }}
-          mkdir -p packaging/{jcal,jdate}/usr/bin
-          cp target/${{ matrix.target }}/release/jcal packaging/jcal/usr/bin/
-          cp target/${{ matrix.target }}/release/jdate packaging/jdate/usr/bin/
+        run: cargo build --release --target ${{ matrix.target }}
 
       - name: Create DEB packages
         run: |
@@ -51,11 +47,11 @@ jobs:
               -n $app \
               -v ${{ github.ref_name }} \
               -a ${{ matrix.deb_arch }} \
-              --maintainer "Your Name <you@example.com>" \
+              --maintainer "Amir Arsalan Yavari" \
               --description "$app application" \
-              -C packaging/$app \
-              -p $app_${{ github.ref_name }}_${{ matrix.deb_arch }}.deb
-          done
+              --package $app-${{ matrix.deb_arch }}.deb \
+              ./target/${{ matrix.target }}/release/$app=/usr/bin/$app
+            done
 
       - name: Create RPM packages
         run: |
@@ -64,10 +60,10 @@ jobs:
               -n $app \
               -v ${{ github.ref_name }} \
               -a ${{ matrix.rpm_arch }} \
-              --maintainer "Your Name <you@example.com>" \
+              --maintainer "Amir Arsalan Yavari" \
               --description "$app application" \
-              -C packaging/$app \
-              -p $app-${{ github.ref_name }}-${{ matrix.rpm_arch }}.rpm
+              --package $app-${{ matrix.rpm_arch }}.rpm \
+              ./target/${{ matrix.target }}/release/$app=/usr/bin/$app
           done
 
       - name: Upload packages
