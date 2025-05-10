@@ -42,9 +42,9 @@ jobs:
           zip -r ${{ matrix.platform }}.zip ./*
 
       - name: Upload File to Assets
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          files: ${{ matrix.platform }}.zip
+          files: target/${{ matrix.platform }}/release/${{ matrix.platform }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -75,9 +75,9 @@ jobs:
           RUSTFLAGS: "-C target-feature=+crt-static"
 
       - name: Upload File to Assets
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          files: ${{ matrix.platform }}.zip
+          files: target/${{ matrix.platform }}/release/${{ matrix.platform }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -106,8 +106,8 @@ jobs:
           zip -r ${{ matrix.platform }}.zip ./*
 
       - name: Upload File to Assets
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          files: ${{ matrix.platform }}.zip
+          files: target/${{ matrix.platform }}/release/${{ matrix.platform }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
