@@ -1,0 +1,80 @@
+name: Linux Package Builder
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  build-packages:
+    name: Build DEB/RPM Packages
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, ubuntu-22.04-arm64]
+        include:
+          - platform: ubuntu-latest
+            deb_arch: amd64
+            rpm_arch: x86_64
+            target: x86_64-unknown-linux-gnu
+          - platform: ubuntu-22.04-arm64
+            deb_arch: arm64
+            rpm_arch: aarch64
+            target: aarch64-unknown-linux-gnu
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ruby ruby-dev rubygems build-essential rpm
+          sudo gem install fpm --no-document
+
+      - name: Build binaries
+        run: |
+          cargo build --release --target ${{ matrix.target }}
+          mkdir -p packaging/{jcal,jdate}/usr/bin
+          cp target/${{ matrix.target }}/release/jcal packaging/jcal/usr/bin/
+          cp target/${{ matrix.target }}/release/jdate packaging/jdate/usr/bin/
+
+      - name: Create DEB packages
+        run: |
+          for app in jcal jdate; do
+            fpm -s dir -t deb \
+              -n $app \
+              -v ${{ github.ref_name }} \
+              -a ${{ matrix.deb_arch }} \
+              --maintainer "Your Name <you@example.com>" \
+              --description "$app application" \
+              -C packaging/$app \
+              -p $app_${{ github.ref_name }}_${{ matrix.deb_arch }}.deb
+          done
+
+      - name: Create RPM packages
+        run: |
+          for app in jcal jdate; do
+            fpm -s dir -t rpm \
+              -n $app \
+              -v ${{ github.ref_name }} \
+              -a ${{ matrix.rpm_arch }} \
+              --maintainer "Your Name <you@example.com>" \
+              --description "$app application" \
+              -C packaging/$app \
+              -p $app-${{ github.ref_name }}-${{ matrix.rpm_arch }}.rpm
+          done
+
+      - name: Upload packages
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            *.deb
+            *.rpm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

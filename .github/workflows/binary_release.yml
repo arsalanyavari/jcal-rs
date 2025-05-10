@@ -1,4 +1,4 @@
-name: Release Build
+name: Binary Release Builder
 
 on:
   release:
@@ -69,7 +69,7 @@ jobs:
         run: |
           cargo build --target ${{ matrix.platform }} --release
           cd target/${{ matrix.platform }}/release/
-          Remove-Item -Recurse -Force $(Get-ChildItem | Where-Object { $_.Name -notin @("jcal", "jdate") })
+          Remove-Item -Recurse -Force $(Get-ChildItem | Where-Object { $_.Name -notin @("jcal.exe", "jdate.exe") })
           Compress-Archive -Path ./* -DestinationPath ${{ matrix.platform }}.zip -Force
         env:
           RUSTFLAGS: "-C target-feature=+crt-static"

@@ -321,21 +321,9 @@ fn print_year(
             let is_friday = col as usize == FRIDAY_INDEX;
 
             let formatted_day_part = if is_today {
-                if persian_output_active {
-                    to_persian_numerals(&day_to_display_num.to_string())
-                        .reversed()
-                        .to_string()
-                } else {
-                    day_to_display_num.to_string().reversed().to_string()
-                }
+                day_num_str_display.as_str().reversed().to_string()
             } else if is_friday {
-                if persian_output_active {
-                    to_persian_numerals(&day_to_display_num.to_string())
-                        .red()
-                        .to_string()
-                } else {
-                    day_to_display_num.to_string().red().to_string()
-                }
+                day_num_str_display.as_str().red().to_string()
             } else {
                 day_num_str_display
             };

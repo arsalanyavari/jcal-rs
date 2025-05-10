@@ -1,0 +1,37 @@
+name: Rust CI
+
+on:
+  push:
+    branches:
+        - "main"
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: rust-lang/setup-rust@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Run Unit Tests
+        run: cargo test --lib --locked
+
+      - name: Run Integration Tests
+        run: cargo test --test tests --locked
