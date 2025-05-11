@@ -1,4 +1,7 @@
-# [jcal](nongnu.org/jcal) Modern Rust implementation of the classic jcal/jdate utilities
+# [Jcal](nongnu.org/jcal) 
+
+### Modern Rust implementation of the classic jcal/jdate utilities
+
 This is the reimplementation of jcal unix command in Rust that originally written by [Ashkan Ghasemi in C](https://github.com/ashkang/jcal)
 
 > [!Note]
@@ -34,9 +37,15 @@ If you download zip file:
 unzip the file then put `jcal` and `jdate` in executable PATH or run then relative (`./jcal` or `./jdate`)
 
 ## Building From Source:
-- $ `git clone https://github.com/arsalanyavari/jcal-rs.git`
-- $ `cd jcal-rs`
-- $ `cargo build --release`
+```bash
+git clone https://github.com/arsalanyavari/jcal-rs.git
+```
+```bash
+cd jcal-rs
+```
+```bash
+cargo build --release
+```
 - $ **jcal** or **jdate** in `target/release/` path
 
 <br>
@@ -71,12 +80,23 @@ Options:
   -V, --version                           Show version information
 ```
 
-## Example
-<img width="400" alt="image" src="https://github.com/user-attachments/assets/54c4707c-99f2-46aa-a719-aa5cd4863d29" />
+## Screenshots
 
-<img width="833" alt="image" src="https://github.com/user-attachments/assets/b6bfc131-12ad-4d29-bfcf-a88af05eb6ab" />
-
-<img width="586" alt="image" src="https://github.com/user-attachments/assets/21e11bc7-ce58-481a-9e7d-ac55c40cfee3" />
+<table class="table">
+  <tbody>
+    <tr>
+      <td>
+        <img src="https://github.com/user-attachments/assets/54c4707c-99f2-46aa-a719-aa5cd4863d29" width="100%" alt="images">
+      </td>
+      <td>
+        <img src="https://github.com/user-attachments/assets/b6bfc131-12ad-4d29-bfcf-a88af05eb6ab" width="100%" alt="images">
+      </td>
+      <td>
+        <img src="https://github.com/user-attachments/assets/21e11bc7-ce58-481a-9e7d-ac55c40cfee3" width="100%" alt="images">
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ```bash
 $ jcal                  # current Jalali month
