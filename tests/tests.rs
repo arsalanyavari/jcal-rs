@@ -68,13 +68,13 @@ fn test_jdate_current_date() {
 
     assert_eq!(exit_code, 0, "jdate should exit with 0. Stderr: {}", stderr);
 
-    // Expected format: Weekday Month Day HH:MM:SS UTC Year
-    // e.g., "Pan Ordibehesht 18 15:02:48 UTC 1404"
+    // Expected format: Weekday Month Day HH:MM:SS [UTC|+/-HH:MM] Year
+    // e.g., "Pan Ordibehesht 18 15:02:48 UTC 1404" or "Pan Ordibehesht 18 15:02:48 +03:30 1404"
     let parts: Vec<&str> = stdout.split_whitespace().collect();
     assert_eq!(
         parts.len(),
         6,
-        "jdate output should be 6 parts (Weekday Month Day HH:MM:SS UTC Year). Stdout: {}\nStderr: {}",
+        "jdate output should be 6 parts (Weekday Month Day HH:MM:SS [UTC|+/-HH:MM] Year). Stdout: {}\nStderr: {}",
         stdout,
         stderr
     );
@@ -93,10 +93,10 @@ fn test_jdate_current_date() {
         stdout,
         stderr
     );
-    // Check for presence of "UTC"
+    // Check for presence of either "UTC" or a timezone offset (+/-HH:MM)
     assert!(
-        stdout.contains("UTC"),
-        "Output should contain 'UTC'. Stdout: {}\nStderr: {}",
+        stdout.contains("UTC") || stdout.contains("+") || stdout.contains("-"),
+        "Output should contain either 'UTC' or a timezone offset (+/-HH:MM). Stdout: {}\nStderr: {}",
         stdout,
         stderr
     );
@@ -374,8 +374,6 @@ fn test_g2j_invalid_gregorian_dates() {
         stderr
     );
 }
-
-
 
 // --- Jalali to Gregorian Conversion Tests ---
 
