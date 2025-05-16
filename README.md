@@ -1,23 +1,23 @@
-# [Scal](nongnu.org/jcal) 
+# Scal
 
-### Modern Rust implementation of the classic scal/sdate utilities
+### Modern Rust implementation of the classic [jcal](nongnu.org/jcal) utilities
 
-This is the reimplementation of scal unix command in Rust that originally written by [Ashkan Ghasemi in C](https://github.com/ashkang/jcal)
+This is the reimplementation of jcal/jdate unix command in Rust that originally written by [Ashkan Ghasemi in C](https://github.com/ashkang/jcal)
 
 > [!Note]
-> I have fixed the bugs in Ashkan's original code related to leap years in the new implementation. However, this version only supports the `scal` and `sdate` commands with the `-j` and `-g` options for all possible years. The other options have not been implemented yet.
+> I have fixed the bugs in Ashkan's original code related to leap years in the new implementation and add sstat command also. This version supports the `scal`, `sdate` and `sstat` commands for all possible years.
 
 # Installation:
 Using pre‑built packages (recommended)
 
-Head over to the [**Releases**](https://github.com/arsalanyavari/jcal-rs/releases/tag/1.1.0) page and grab the asset that matches your system:
+Head over to the [**Releases**](https://github.com/arsalanyavari/scal/releases) page and grab the asset that matches your system:
 
 | Distro / OS     | Architecture            | File                                           |
 | --------------- | ----------------------- | ---------------------------------------------- |
-| Debian / Ubuntu | `x86_64`                | `scal-amd64.deb`                       |
-|                 | `arm64`                 | `scal-arm64.deb`                       |
-| Fedora / RHEL   | `x86_64`                | `scal-x86_64.rpm`                    |
-|                 | `arm64`                 | `scal-aarch64.rpm`                   |
+| Debian / Ubuntu | `x86_64`                | `{scal,sdate,sstat}-amd64.deb`                       |
+|                 | `arm64`                 | `{scal,sdate,sstat}-arm64.deb`                       |
+| Fedora / RHEL   | `x86_64`                | `{scal,sdate,sstat}-x86_64.rpm`                    |
+|                 | `arm64`                 | `{scal,sdate,sstat}-aarch64.rpm`                   |
 | Linux (any)     | `x86_64`, `arm64`       | `<arch>-unknown-linux-gnu.zip` |
 | Windows 10+     | `x86_64`                | `x86_64-pc-windows-gnu.zip`      |
 | macOS 11+       | `arm64` (Apple Silicon) | `aarch64-apple-darwin.zip`        |
@@ -28,20 +28,22 @@ If you download Linux packages:
 # Debian / Ubuntu
 sudo dpkg -i scal-*.deb
 sudo dpkg -i sdate-*.deb
+sudo dpkg -i sstat-*.deb
 
 # Fedora / RHEL
 sudo rpm -i scal-*.rpm
 sudo rpm -i sdate-*.rpm
+sudo rpm -i sstat-*.rpm
 ```
 If you download zip file:
-unzip the file then put `scal` and `sdate` in executable PATH or run then relative (`./scal` or `./sdate`)
+unzip the file then put `scal`, `sdate` and `sstat` in executable PATH or run then relative (`./scal`, `./sdate` or `./sstat`)
 
 ## Building From Source:
 ```bash
-git clone https://github.com/arsalanyavari/jcal-rs.git
+git clone https://github.com/arsalanyavari/scal.git
 ```
 ```bash
-cd jcal-rs
+cd scal
 ```
 ```bash
 cargo build --release
@@ -56,16 +58,16 @@ $ scal -h
 Usage: scal [OPTIONS] [YEAR]
 
 Arguments:
-  [YEAR]  Shamsi (Jalali) year to display (defaults to current)
+  [YEAR]  
 
 Options:
-  -P, --pahlavi            Display year based on Pahlavi era
-  -p, --persian-output     Use Persian numerals and month names
-  -e, --english-days       Show English weekday names (Sa, Su, …)
-  -y, --current-year-view  Print the calendar for the current year
-  -j, --julian-days        Print Julian day‑of‑year in calendar cells
+  -P, --pahlavi            Display year based on Pahlavi year
+  -p, --persian-output     Display Farsi numbers and names
+  -e, --english-days       Display English weekday names (Sa, Su, ...)
+  -y, --current-year-view  Display the calendar for the current year
+  -j, --julian-days        Display Julian dates (day of year)
   -h, --help               Print help
-  -V, --version            Show version information
+  -V, --version            Print version
 ```
 
 ### sdate Converts between Shamsi (Jalali) and Gregorian dates
@@ -74,10 +76,34 @@ $ sdate -h
 Usage: sdate [OPTIONS]
 
 Options:
-  -g, --jalali-to-gregorian <YYYY/MM/DD>    Convert Shamsi (Jalali) to Gregorian date
-  -j, --gregorian-to-jalali <YYYY/MM/DD>    Convert Gregorian to Shamsi (Jalali) date
-  -h, --help                              Print help
-  -V, --version                           Show version information
+  -g, --jalali-to-gregorian <YYYY/MM/DD>       Convert Jalali to Gregorian date
+  -j, --gregorian-to-jalali <YYYY/MM/DD>       Convert Gregorian to Jalali date
+  -u, --utc                                    Display time in UTC
+  -z, --timezone <TIMEZONE>                    Set a specific timezone
+  -R, --rfc2822                                Output in RFC 2822 format
+  -I, --iso8601[=<PRECISION>]                  Output in ISO 8601 format
+  -v, --adjustments <[+|-]val[y|m|w|d|H|M|S]>  Adjust date/time
+  -h, --help                                   Print help
+  -V, --version                                Print version
+```
+
+### sstat shows the stats of file in Shamsi (Jalali)
+```bash
+$ sstat -h
+Usage: sstat [OPTIONS] <PATHS>...
+
+Arguments:
+  <PATHS>...  File(s) or directory(s) to get status of
+
+Options:
+  -p, --persian-output  Display Farsi numbers and names
+  -l, --ls-format       Display in ls -lT format
+  -n, --no-newline      Do not print trailing newline
+  -r, --raw-format      Display raw numerical information
+  -x, --verbose-format  Display verbose information
+  -s, --shell-format    Display in shell-friendly format for `eval`
+  -h, --help            Print help
+  -V, --version         Print version
 ```
 
 ## Screenshots
@@ -109,13 +135,15 @@ $ scal -j 1398 -e -P    # year 1398 in Pahlavi format with English weekdays and 
 $ sdate -g 1404/01/01   # convert 1404/01/01 to 2025/03/21
 $ sdate -j 2025/12/31   # convert 2025/12/31 to 1404/10/10
 $ sdate -h              # sdate help
+$ sstat /path/to file   # show the stats of file
+$ sstat -h              # sstat help
 ```
 
 ## Contributing
 Feel free to contribute! If you like this project, giving it a star 🌟 would make me happy and might motivate me to improve the code even further.
 
 - Fork and Develop : Feel free to fork the repository and make your changes. If you think your changes are useful, submit a pull request so I can review and merge them into this codebase.
-- Report Issues : If you notice any bugs or have suggestions for improvements, [open an issue](https://github.com/arsalanyavari/jcal-rs/issues/new). Your feedback is valuable!
+- Report Issues : If you notice any bugs or have suggestions for improvements, [open an issue](https://github.com/arsalanyavari/scal/issues/new). Your feedback is valuable!
 
 `Every little contribution helps, and I appreciate your support.`
 
