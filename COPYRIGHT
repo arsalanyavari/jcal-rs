@@ -2,8 +2,9 @@ SPDX-FileCopyrightText: 2025  Amir Arsalan Yavari <arya48.yavari79@gmail.com>
 SPDX-License-Identifier: LGPL-3.0-or-later
 
 
-jcal – show Jalaali calendar in the command line
-jdate – convert and show Jalaali, Gregorian and Lunar dates
+scal – show Jalali calendar in the command line
+sdate – convert and show Jalali, Gregorian and Lunar dates
+sstat - show stats of file in Jalali
 
 This project is a complete Rust re-implementation of the original “jcal”
 and “jdate” concept (first written in C by Ashkan Ghasemi).  
