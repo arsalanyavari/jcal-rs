@@ -48,39 +48,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  build-windows:
-    name: Build for Windows (x86_64)
-    runs-on: windows-latest
-
-    strategy:
-      matrix:
-        platform: [x86_64-pc-windows-gnu]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.platform }}
-
-      - name: Build and Package
-        run: |
-          cargo build --target ${{ matrix.platform }} --release
-          cd target/${{ matrix.platform }}/release/
-          Remove-Item -Recurse -Force $(Get-ChildItem | Where-Object { $_.Name -notin @("scal.exe", "sdate.exe", "sstat.exe") })
-          Compress-Archive -Path ./* -DestinationPath ${{ matrix.platform }}.zip -Force
-        env:
-          RUSTFLAGS: "-C target-feature=+crt-static"
-
-      - name: Upload File to Assets
-        uses: softprops/action-gh-release@v2
-        with:
-          files: target/${{ matrix.platform }}/release/${{ matrix.platform }}.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   build-macos:
     name: Build for macOS (x86_64, ARM64)
     runs-on: macos-latest
