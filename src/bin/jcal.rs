@@ -8,7 +8,6 @@ use jcal_lib::*;
 pub const BASE_DAY_CELL_WIDTH: usize = 3;
 pub const JULIAN_DAY_CELL_WIDTH: usize = 4;
 
-pub const FRIDAY_INDEX: usize = 6;
 pub const MONTHS_PER_ROW: usize = 3;
 pub const COLUMN_SPACING: &str = "  ";
 pub const MAX_DAYS_LINE_WIDTH: usize = JULIAN_DAY_CELL_WIDTH * (jcal_lib::WEEK_DAYS_TOTAL as usize);
@@ -38,18 +37,27 @@ struct Cli {
     julian_days: bool,
 }
 
+struct PrintConfig {
+    pahlavi_active: bool,
+    persian_output_active: bool,
+    english_days_active: bool,
+    julian_days_active: bool,
+}
+
 fn main() {
     let cli = Cli::parse();
 
     if cli.persian_output && cli.english_days {
         eprintln!(
-            "Error: The -p (Persian output) and -e (English output) options cannot be used together."
+            "Error: The -p (Persian output) and -e (English output) options cannot be used together. Example: jcal -p 1379 or jcal -e 1379"
         );
         std::process::exit(1);
     }
 
     if cli.current_year_view && cli.year.is_some() {
-        eprintln!("Error: The -y option cannot be used when a specific year is provided.");
+        eprintln!(
+            "Error: The -y option cannot be used when a specific year is provided. Example: jcal -y"
+        );
         std::process::exit(1);
     }
 
@@ -58,49 +66,34 @@ fn main() {
         gregorian_to_jalali(now.year(), now.month(), now.day())
     };
 
-    let pahlavi_active = cli.pahlavi;
-    let persian_output_active = cli.persian_output;
-    let english_days_active = cli.english_days;
-    let current_year_view_active = cli.current_year_view;
-    let julian_days_active = cli.julian_days;
+    let print_config = PrintConfig {
+        pahlavi_active: cli.pahlavi,
+        persian_output_active: cli.persian_output,
+        english_days_active: cli.english_days,
+        julian_days_active: cli.julian_days,
+    };
 
     match cli.year {
         Some(y) => {
-            let display_jy = if pahlavi_active { y + 1180 } else { y };
+            let display_jy = if print_config.pahlavi_active {
+                y + 1180
+            } else {
+                y
+            };
             let calc_jy = y; // The original year
-            print_year(
-                display_jy,
-                calc_jy,
-                cur_jy,
-                cur_jm,
-                cur_jd,
-                pahlavi_active,
-                persian_output_active,
-                english_days_active,
-                julian_days_active,
-            );
+            print_year(display_jy, calc_jy, cur_jy, cur_jm, cur_jd, &print_config);
         }
         None => {
-            if current_year_view_active {
-                let display_jy = if pahlavi_active {
+            if cli.current_year_view {
+                let display_jy = if print_config.pahlavi_active {
                     cur_jy + 1180
                 } else {
                     cur_jy
                 };
                 // For current year
-                print_year(
-                    display_jy,
-                    cur_jy,
-                    cur_jy,
-                    cur_jm,
-                    cur_jd,
-                    pahlavi_active,
-                    persian_output_active,
-                    english_days_active,
-                    julian_days_active,
-                );
+                print_year(display_jy, cur_jy, cur_jy, cur_jm, cur_jd, &print_config);
             } else {
-                let display_jy = if pahlavi_active {
+                let display_jy = if print_config.pahlavi_active {
                     cur_jy + 1180
                 } else {
                     cur_jy
@@ -113,10 +106,7 @@ fn main() {
                     cur_jy,
                     cur_jm,
                     cur_jd,
-                    pahlavi_active,
-                    persian_output_active,
-                    english_days_active,
-                    julian_days_active,
+                    &print_config,
                 );
             }
         }
@@ -130,32 +120,29 @@ fn print_month(
     cur_jy: i32,
     cur_jm: u8,
     cur_jd: u8,
-    pahlavi_active: bool,
-    persian_output_active: bool,
-    english_days_active: bool,
-    julian_days_active: bool,
+    config: &PrintConfig,
 ) {
-    let day_cell_width = if julian_days_active {
+    let day_cell_width = if config.julian_days_active {
         JULIAN_DAY_CELL_WIDTH
     } else {
         BASE_DAY_CELL_WIDTH
     };
     let current_calendar_width = day_cell_width * (jcal_lib::WEEK_DAYS_TOTAL as usize);
 
-    let month_name_str = if persian_output_active {
+    let month_name_str = if config.persian_output_active {
         PERSIAN_MONTH_NAMES[(jm - 1) as usize]
     } else {
         MONTH_NAMES[(jm - 1) as usize]
     };
-    let display_year_str = if persian_output_active {
+    let display_year_str = if config.persian_output_active {
         to_persian_numerals(&display_jy.to_string())
     } else {
         display_jy.to_string()
     };
 
     let mut title_str = format!("{} {}", month_name_str, display_year_str);
-    if pahlavi_active {
-        if persian_output_active {
+    if config.pahlavi_active {
+        if config.persian_output_active {
             title_str.push_str(" (پهلوی)");
         } else {
             title_str.push_str(" (Pahlavi)");
@@ -163,15 +150,15 @@ fn print_month(
     }
     println!("{:^width$}", title_str, width = current_calendar_width);
 
-    let week_days_to_use = if persian_output_active {
+    let week_days_to_use = if config.persian_output_active {
         PERSIAN_WEEK_DAYS_AB.as_slice()
-    } else if english_days_active {
+    } else if config.english_days_active {
         ENGLISH_WEEK_DAYS_AB.as_slice()
     } else {
         WEEK_DAYS_AB.as_slice()
     };
     for (i, &day_name) in week_days_to_use.iter().enumerate() {
-        if i == FRIDAY_INDEX {
+        if i == JALALI_FRIDAY_INDEX {
             print!("{:>width$}", day_name.red(), width = day_cell_width);
         } else {
             print!("{:>width$}", day_name, width = day_cell_width);
@@ -192,13 +179,13 @@ fn print_month(
 
     let mut col = first_col;
     for day in 1..=dim {
-        let day_to_display_num = if julian_days_active {
+        let day_to_display_num = if config.julian_days_active {
             jalali_day_of_year(calc_jy, jm, day)
         } else {
             day as i32
         };
         let day_num_str_original = day_to_display_num.to_string();
-        let day_num_str = if persian_output_active {
+        let day_num_str = if config.persian_output_active {
             to_persian_numerals(&day_num_str_original)
         } else {
             day_num_str_original
@@ -208,7 +195,7 @@ fn print_month(
         let padding = " ".repeat(padding_len);
 
         let is_today = calc_jy == cur_jy && jm == cur_jm && day == cur_jd;
-        let is_friday = col as usize == FRIDAY_INDEX;
+        let is_friday = col as usize == JALALI_FRIDAY_INDEX;
 
         if is_today {
             print!("{}{}", padding, day_num_str.reversed());
@@ -235,12 +222,9 @@ fn print_year(
     cur_jy: i32,
     cur_jm: u8,
     cur_jd: u8,
-    pahlavi_active: bool,
-    persian_output_active: bool,
-    english_days_active: bool,
-    julian_days_active: bool,
+    config: &PrintConfig,
 ) {
-    let day_cell_width = if julian_days_active {
+    let day_cell_width = if config.julian_days_active {
         JULIAN_DAY_CELL_WIDTH
     } else {
         BASE_DAY_CELL_WIDTH
@@ -251,14 +235,14 @@ fn print_year(
 
     let mut month_lines: Vec<Vec<String>> = vec![vec![]; 12];
 
-    let active_month_names = if persian_output_active {
+    let active_month_names = if config.persian_output_active {
         PERSIAN_MONTH_NAMES.as_slice()
     } else {
         MONTH_NAMES.as_slice()
     };
-    let active_week_days = if persian_output_active {
+    let active_week_days = if config.persian_output_active {
         PERSIAN_WEEK_DAYS_AB.as_slice()
-    } else if english_days_active {
+    } else if config.english_days_active {
         ENGLISH_WEEK_DAYS_AB.as_slice()
     } else {
         WEEK_DAYS_AB.as_slice()
@@ -276,7 +260,7 @@ fn print_year(
 
         let mut day_names_line = String::with_capacity(MAX_DAYS_LINE_WIDTH);
         for (i, &day_name) in active_week_days.iter().enumerate() {
-            if i == FRIDAY_INDEX {
+            if i == JALALI_FRIDAY_INDEX {
                 day_names_line.push_str(&format!(
                     "{:>width$}",
                     day_name.red(),
@@ -301,14 +285,14 @@ fn print_year(
 
         let mut col = first_col;
         for day in 1..=dim {
-            let day_to_display_num = if julian_days_active {
+            let day_to_display_num = if config.julian_days_active {
                 jalali_day_of_year(calc_jy, jm, day)
             } else {
                 day as i32
             };
             let day_num_str_original = day_to_display_num.to_string();
 
-            let day_num_str_display = if persian_output_active {
+            let day_num_str_display = if config.persian_output_active {
                 to_persian_numerals(&day_num_str_original)
             } else {
                 day_num_str_original
@@ -318,7 +302,7 @@ fn print_year(
             let padding = " ".repeat(padding_len);
 
             let is_today = calc_jy == cur_jy && jm == cur_jm && day == cur_jd;
-            let is_friday = col as usize == FRIDAY_INDEX;
+            let is_friday = col as usize == JALALI_FRIDAY_INDEX;
 
             let formatted_day_part = if is_today {
                 day_num_str_display.as_str().reversed().to_string()
@@ -342,25 +326,28 @@ fn print_year(
         }
     }
 
-    let year_header_display_str = if persian_output_active {
-        to_persian_numerals(&display_jy.to_string())
+    let year_header = if config.persian_output_active {
+        format!(
+            "{} {}",
+            to_persian_numerals(&display_jy.to_string()),
+            if config.pahlavi_active {
+                "(پهلوی)"
+            } else {
+                ""
+            }
+        )
     } else {
-        display_jy.to_string()
+        format!(
+            "{} {}",
+            display_jy,
+            if config.pahlavi_active {
+                "(Pahlavi)"
+            } else {
+                ""
+            }
+        )
     };
-    let year_header_str = if pahlavi_active {
-        if persian_output_active {
-            format!("{} (پهلوی)", year_header_display_str)
-        } else {
-            format!("{} (Pahlavi)", year_header_display_str)
-        }
-    } else {
-        year_header_display_str
-    };
-    println!(
-        "{:^width$}",
-        year_header_str,
-        width = current_year_header_width
-    );
+    println!("{:^width$}", year_header, width = current_year_header_width);
     println!();
 
     for row in 0..4 {

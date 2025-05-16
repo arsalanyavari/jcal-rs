@@ -4,26 +4,6 @@ use clap::Parser;
 use jcal_lib::*;
 use std::process;
 
-// Constants for magic numbers
-const MAX_MONTH: u32 = 12;
-const MAX_DAY: u32 = 31;
-const WEEKDAYS_GREGORIAN: [&str; 7] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const WEEKDAYS_JALALI: [&str; 7] = ["Sha", "Yek", "Dos", "Ses", "Cha", "Pan", "Jom"];
-const MONTH_ABBRS: [&str; 12] = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
-
-#[derive(Debug)]
-enum TimeUnit {
-    Year,
-    Month,
-    Week,
-    Day,
-    Hour,
-    Minute,
-    Second,
-}
-
 #[derive(Debug)]
 enum AdjustmentType {
     Add(i64),
@@ -40,7 +20,7 @@ struct TimeAdjustment {
 impl TimeAdjustment {
     fn parse(input: &str) -> Result<Self, &'static str> {
         if input.is_empty() {
-            return Err("Empty adjustment string");
+            return Err("Error: Empty adjustment string. Example: +5d");
         }
 
         let (adjustment_type, rest) = match input.chars().next().unwrap() {
@@ -61,7 +41,9 @@ impl TimeAdjustment {
             }
         }
 
-        let value = value_str.parse::<i64>().map_err(|_| "Invalid number")?;
+        let value = value_str
+            .parse::<i64>()
+            .map_err(|_| "Error: Invalid number in adjustment string. Example: +5d")?;
         let unit = match unit_char {
             Some('y') => TimeUnit::Year,
             Some('m') => TimeUnit::Month,
@@ -70,7 +52,11 @@ impl TimeAdjustment {
             Some('H') => TimeUnit::Hour,
             Some('M') => TimeUnit::Minute,
             Some('S') => TimeUnit::Second,
-            _ => return Err("Invalid time unit. Use y, m, w, d, H, M, or S"),
+            _ => {
+                return Err(
+                    "Error: Invalid time unit in adjustment string. Use y, m, w, d, H, M, or S. Example: +5d",
+                );
+            }
         };
 
         let value = match adjustment_type {
@@ -171,15 +157,21 @@ impl TimeAdjustment {
             }
             TimeUnit::Month => {
                 let new_jm = self.value as u8;
-                if new_jm < 1 || new_jm > 12 {
-                    panic!("Invalid Jalali month: {}", new_jm);
+                if !(1..=12).contains(&new_jm) {
+                    panic!(
+                        "Error: Invalid Jalali month: {}. Example: 1379/08/15",
+                        new_jm
+                    );
                 }
                 (jy, new_jm, jd)
             }
             TimeUnit::Day => {
                 let new_jd = self.value as u8;
                 if new_jd < 1 || new_jd > days_in_month(jy, jm) {
-                    panic!("Invalid Jalali day: {} for month {}", new_jd, jm);
+                    panic!(
+                        "Error: Invalid Jalali day: {} for month {}. Example: 1379/08/15",
+                        new_jd, jm
+                    );
                 }
                 (jy, jm, new_jd)
             }
@@ -210,8 +202,8 @@ impl TimeAdjustment {
             TimeUnit::Week => {
                 // For week, we'll set to the first day of the specified week
                 let week_start = (self.value as i32 - 1) * 7 + 1;
-                if week_start < 1 || week_start > 365 {
-                    panic!("Invalid week number: {}", self.value);
+                if !(1..=365).contains(&week_start) {
+                    panic!("Error: Invalid week number: {}. Example: 42", self.value);
                 }
                 let mut day_count = 0;
                 let mut new_jm = 1;
@@ -240,32 +232,53 @@ impl TimeAdjustment {
 #[command(
     author = "Amir Arsalan Yavari",
     version,
-    about = "Converts between Jalali and Gregorian dates",
+    about = "Jalali date like date command",
     name = "jdate"
 )]
 struct Cli {
     // Convert Jalali date (YYYY/MM/DD) to Gregorian
-    #[arg(short = 'g', long, value_name = "YYYY/MM/DD")]
+    #[arg(
+        short = 'g',
+        long,
+        value_name = "YYYY/MM/DD",
+        help = "Convert Jalali to Gregorian date"
+    )]
     jalali_to_gregorian: Option<String>,
 
     // Convert Gregorian date (YYYY/MM/DD) to Jalali
-    #[arg(short = 'j', long, value_name = "YYYY/MM/DD")]
+    #[arg(
+        short = 'j',
+        long,
+        value_name = "YYYY/MM/DD",
+        help = "Convert Gregorian to Jalali date"
+    )]
     gregorian_to_jalali: Option<String>,
 
     // Show UTC time instead of local time
-    #[arg(short = 'u', long)]
+    #[arg(short = 'u', long, help = "Display time in UTC")]
     utc: bool,
 
     // Set timezone
-    #[arg(short = 'z', long, value_name = "TIMEZONE")]
+    #[arg(
+        short = 'z',
+        long,
+        value_name = "TIMEZONE",
+        help = "Set a specific timezone"
+    )]
     timezone: Option<String>,
 
     // RFC 2822 format
-    #[arg(short = 'R', long)]
+    #[arg(short = 'R', long, help = "Output in RFC 2822 format")]
     rfc2822: bool,
 
     // ISO 8601 format
-    #[arg(short = 'I', long, value_name = "PRECISION", require_equals = true)]
+    #[arg(
+        short = 'I',
+        long,
+        value_name = "PRECISION",
+        require_equals = true,
+        help = "Output in ISO 8601 format"
+    )]
     iso8601: Option<Option<String>>,
 
     // Adjust time by value[unit]
@@ -273,24 +286,51 @@ struct Cli {
         short = 'v',
         long,
         value_name = "[+|-]val[y|m|w|d|H|M|S]",
-        allow_hyphen_values = true
+        allow_hyphen_values = true,
+        help = "Adjust date/time"
     )]
     adjustments: Vec<String>,
 }
 
 // Parse YYYY/MM/DD or YYYY-MM-DD
-fn parse_date(date_str: &str) -> Result<(i32, u32, u32), &'static str> {
+fn parse_date(date_str: &str, is_jalali_context: bool) -> Result<(i32, u32, u32), String> {
+    let example_date_str = if is_jalali_context {
+        "1379/08/15"
+    } else {
+        "2000/11/05"
+    };
+    let example_year_str = if is_jalali_context { "1379" } else { "2000" };
+    let example_month_str = if is_jalali_context { "08" } else { "11" };
+    let example_day_str = if is_jalali_context { "15" } else { "05" };
+
     let parts: Vec<&str> = date_str.split(['/', '-']).collect();
     if parts.len() != 3 {
-        return Err("Invalid date format. Use YYYY/MM/DD or YYYY-MM-DD.");
+        return Err(
+            "Error: Invalid date format. Use YYYY/MM/DD. Example: 2000/11/05 or 1379/08/15"
+                .to_string(),
+        );
     }
 
-    let year = parts[0].parse::<i32>().map_err(|_| "Invalid year")?;
-    let month = parts[1].parse::<u32>().map_err(|_| "Invalid month")?;
-    let day = parts[2].parse::<u32>().map_err(|_| "Invalid day")?;
+    let year = parts[0]
+        .parse::<i32>()
+        .map_err(|_| format!("Error: Invalid year. Example: {}", example_year_str))?;
+    let month = parts[1]
+        .parse::<u32>()
+        .map_err(|_| format!("Error: Invalid month. Example: {}", example_month_str))?;
+    let day = parts[2]
+        .parse::<u32>()
+        .map_err(|_| format!("Error: Invalid day. Example: {}", example_day_str))?;
 
-    if month == 0 || month > MAX_MONTH || day == 0 || day > MAX_DAY {
-        return Err("Invalid month or day value.");
+    if month == 0
+        || month > MONTHS_PER_YEAR_COUNT as u32
+        || day == 0
+        || day > MAX_DAYS_IN_GREGORIAN_MONTH as u32
+    // Max 31 days is a safe general check here
+    {
+        return Err(format!(
+            "Error: Invalid month or day value. Month should be 1-12, Day should be 1-31 (approx). Example: {}",
+            example_date_str
+        ));
     }
 
     Ok((year, month, day))
@@ -298,7 +338,7 @@ fn parse_date(date_str: &str) -> Result<(i32, u32, u32), &'static str> {
 
 fn format_rfc2822(dt: NaiveDateTime, jy: i32, jm: u8, jd: u8, offset_str: &str) -> String {
     let weekday_idx = (dt.weekday().num_days_from_sunday() + 1) % 7;
-    let jalali_weekday_abbr = WEEKDAYS_JALALI[weekday_idx as usize];
+    let jalali_weekday_abbr = JALALI_WEEKDAYS_ABBR_ALT[weekday_idx as usize];
     let month_name = MONTH_NAMES[(jm - 1) as usize];
     format!(
         "{}, {} {} {} {:02}:{:02}:{:02} {}",
@@ -354,10 +394,13 @@ fn main() {
     match (cli.jalali_to_gregorian, cli.gregorian_to_jalali) {
         (Some(jdate_str), None) => {
             // Jalali to Gregorian (-g)
-            match parse_date(&jdate_str) {
+            match parse_date(&jdate_str, true) {
                 Ok((jy, jm, jd)) => {
                     if jd > days_in_month(jy, jm as u8) as u32 {
-                        eprintln!("Error: Invalid day {} for month {} in year {}", jd, jm, jy);
+                        eprintln!(
+                            "Error: Invalid day {} for month {} in year {}. Example: 1379/08/15",
+                            jd, jm, jy
+                        );
                         process::exit(1);
                     }
                     let (gy, gm, gd) = jalali_to_gregorian(jy, jm as u8, jd as u8);
@@ -366,9 +409,9 @@ fn main() {
                         Some(naive_date) => {
                             let datetime = naive_date.and_hms_opt(0, 0, 0).unwrap();
                             // We'll format manually to match.
-                            let weekday = WEEKDAYS_GREGORIAN
+                            let weekday = GREGORIAN_WEEKDAYS_ABBR
                                 [datetime.weekday().num_days_from_monday() as usize];
-                            let month_abbr = MONTH_ABBRS[(gm - 1) as usize];
+                            let month_abbr = GREGORIAN_MONTH_ABBRS[(gm - 1) as usize];
                             println!(
                                 "{} {} {:02} {:02}:{:02}:{:02} UTC {}",
                                 weekday,
@@ -382,7 +425,7 @@ fn main() {
                         }
                         None => {
                             eprintln!(
-                                "Error: Calculated Gregorian date ({}-{}-{}) is invalid.",
+                                "Error: Calculated Gregorian date ({}-{}-{}) is invalid. Example: 2000/11/05",
                                 gy, gm, gd
                             );
                             process::exit(1);
@@ -390,17 +433,17 @@ fn main() {
                     }
                 }
                 Err(e) => {
-                    eprintln!("Error parsing Jalali date: {}", e);
+                    eprintln!("Error: {}", e);
                     process::exit(1);
                 }
             }
         }
         (None, Some(gdate_str)) => {
             // Gregorian to Jalali (-j)
-            match parse_date(&gdate_str) {
+            match parse_date(&gdate_str, false) {
                 Ok((gy, gm, gd)) => {
                     if NaiveDate::from_ymd_opt(gy, gm, gd).is_none() {
-                        eprintln!("Error: Invalid Gregorian date specified.");
+                        eprintln!("Error: Invalid Gregorian date specified. Example: 2000/11/05");
                         process::exit(1);
                     }
                     let (jy, jm, jd) = gregorian_to_jalali(gy, gm, gd);
@@ -409,7 +452,8 @@ fn main() {
                     match NaiveDate::from_ymd_opt(g_conv_y, g_conv_m, g_conv_d) {
                         Some(naive_date) => {
                             let weekday_idx = (naive_date.weekday().num_days_from_sunday() + 1) % 7;
-                            let jalali_weekday_abbr = WEEKDAYS_JALALI[weekday_idx as usize];
+                            let jalali_weekday_abbr =
+                                JALALI_WEEKDAYS_ABBR_ALT[weekday_idx as usize];
                             let month_name = MONTH_NAMES[(jm - 1) as usize];
                             println!(
                                 "{} {} {:02} 00:00:00 UTC {}",
@@ -417,13 +461,15 @@ fn main() {
                             );
                         }
                         None => {
-                            eprintln!("Error: Internal conversion resulted in invalid date.");
+                            eprintln!(
+                                "Error: Internal conversion resulted in invalid date. Example: 1379/08/15"
+                            );
                             process::exit(1);
                         }
                     }
                 }
                 Err(e) => {
-                    eprintln!("Error parsing Gregorian date: {}", e);
+                    eprintln!("Error: {}", e);
                     process::exit(1);
                 }
             }
@@ -437,7 +483,10 @@ fn main() {
                         (tz_now.naive_local(), tz_now.offset().to_string())
                     }
                     Err(_) => {
-                        eprintln!("Error: Invalid timezone '{}'", tz_str);
+                        eprintln!(
+                            "Error: Invalid timezone \'{}\'. Example: America/New_York",
+                            tz_str
+                        );
                         process::exit(1);
                     }
                 }
@@ -456,7 +505,10 @@ fn main() {
                     match TimeAdjustment::parse(adj_str) {
                         Ok(adj) => dt = adj.apply(dt),
                         Err(e) => {
-                            eprintln!("Error parsing adjustment '{}': {}", adj_str, e);
+                            eprintln!(
+                                "Error: Could not parse adjustment string \'{}\': {}. Example: +5d or -2m",
+                                adj_str, e
+                            );
                             process::exit(1);
                         }
                     }
@@ -478,7 +530,7 @@ fn main() {
                 );
             } else {
                 let weekday_idx = (adjusted_dt.weekday().num_days_from_sunday() + 1) % 7;
-                let jalali_weekday_abbr = WEEKDAYS_JALALI[weekday_idx as usize];
+                let jalali_weekday_abbr = JALALI_WEEKDAYS_ABBR_ALT[weekday_idx as usize];
                 let month_name = MONTH_NAMES[(jm - 1) as usize];
 
                 println!(
@@ -495,7 +547,9 @@ fn main() {
             }
         }
         (Some(_), Some(_)) => {
-            eprintln!("Error: Please specify only one of -g or -j.");
+            eprintln!(
+                "Error: Please specify only one of -g (Jalali to Gregorian) or -j (Gregorian to Jalali). Example: jdate -g 1379/08/15 or jdate -j 2000/11/05"
+            );
             process::exit(1);
         }
     }

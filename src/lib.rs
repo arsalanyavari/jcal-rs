@@ -73,6 +73,29 @@ pub const PERSIAN_WEEK_DAYS_AB: [&str; 7] = ["شن", "یک", "دو", "سه", "چ
 
 pub const ENGLISH_WEEK_DAYS_AB: [&str; 7] = ["Sa", "Su", "Mo", "Tu", "We", "Th", "Fr"];
 
+pub const JALALI_WEEKDAYS_ABBR_ALT: [&str; 7] = ["Sha", "Yek", "Dos", "Ses", "Cha", "Pan", "Jom"];
+
+pub const JALALI_FRIDAY_INDEX: usize = 6; // Friday is the 7th day, 0-indexed from Saturday
+
+pub const MONTHS_PER_YEAR_COUNT: u8 = 12;
+pub const MAX_DAYS_IN_GREGORIAN_MONTH: u8 = 31; // Max possible days in any Gregorian month
+
+pub const GREGORIAN_WEEKDAYS_ABBR: [&str; 7] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+pub const GREGORIAN_MONTH_ABBRS: [&str; 12] = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+#[derive(Debug, Clone, Copy)]
+pub enum TimeUnit {
+    Year,
+    Month,
+    Week,
+    Day,
+    Hour,
+    Minute,
+    Second,
+}
+
 pub fn to_persian_numerals(input: &str) -> String {
     input
         .chars()
@@ -124,7 +147,9 @@ pub fn days_in_month(jy: i32, jm: u8) -> u8 {
                 DAYS_IN_SHORT_MONTH
             }
         }
-        _ => panic!("month out of range (1‑12)"),
+        _ => panic!(
+            "Error: Month out of range (1-12)."
+        ),
     }
 }
 
@@ -162,7 +187,10 @@ fn jalali_to_jdn_internal(jy: i32, jm: u8, jd: u8) -> i64 {
 
 pub fn jalali_to_gregorian(jy: i32, jm: u8, jd: u8) -> (i32, u32, u32) {
     if jm == 0 || jm > LAST_MONTH_INDEX || jd == 0 || jd > days_in_month(jy, jm) {
-        panic!("Invalid Jalali date: year {}, month {}, day {}", jy, jm, jd);
+        panic!(
+            "Error: Invalid Jalali date: year {}, month {}, day {}.",
+            jy, jm, jd
+        );
     }
 
     let jdn = jalali_to_jdn_internal(jy, jm, jd);
@@ -173,7 +201,7 @@ pub fn jalali_to_gregorian(jy: i32, jm: u8, jd: u8) -> (i32, u32, u32) {
         Some(date) => (date.year(), date.month(), date.day()),
         None => {
             panic!(
-                "Failed to convert JDN {} (days from CE: {}) to Gregorian date.",
+                "Error: Failed to convert JDN {} (days from CE: {}) to Gregorian date.",
                 jdn, days_from_ce
             )
         }
@@ -269,7 +297,7 @@ pub fn gregorian_to_jalali(gy: i32, gm: u32, gd: u32) -> (i32, u8, u8) {
                 || (gm == MIN_GREGORIAN_MONTH_FOR_JALALI && gd < MIN_GREGORIAN_DAY_FOR_JALALI)))
     {
         panic!(
-            "Input Gregorian date {}/{}/{} is before 622-03-22 Gregorian (approximate Jalali epoch start) and cannot be converted to Jalali.",
+            "Error: Input Gregorian date {}/{}/{} is before 622-03-22 Gregorian (approximate Jalali epoch start) and cannot be converted to Jalali.",
             gy, gm, gd
         );
     }

@@ -7,37 +7,32 @@ use std::os::unix::fs::MetadataExt;
 use std::path::Path;
 use std::process;
 use std::time::SystemTime;
-use users;
 
 #[derive(Parser)]
 #[command(
-    author = "Your Name",
+    author = "Amir Arsalan Yavari",
     version,
-    about = "Jalali stat - displays file or file system status with Jalali dates",
+    about = "Jalali stat displays file or file system status with Jalali dates",
     name = "jstat"
 )]
 struct Cli {
     #[arg(required = true, num_args = 1.., help = "File(s) or directory(s) to get status of")]
     paths: Vec<String>,
-    #[arg(
-        short = 'p',
-        long,
-        help = "Display Farsi numbers and names, applies to numerical output in -s and -r modes as well"
-    )]
+    #[arg(short = 'p', long, help = "Display Farsi numbers and names")]
     persian_output: bool,
-    #[arg(short = 'l', long, help = "Display output in ls -lT format")]
+    #[arg(short = 'l', long, help = "Display in ls -lT format")]
     ls_format: bool,
-    #[arg(
-        short = 'n',
-        long,
-        help = "Do not force a newline to appear at the end of each piece of output"
-    )]
+    #[arg(short = 'n', long, help = "Do not print trailing newline")]
     no_newline: bool,
     #[arg(short = 'r', long, help = "Display raw numerical information")]
     raw_format: bool,
-    #[arg(short = 'x', long, help = "Display verbose information (Linux style)")]
+    #[arg(short = 'x', long, help = "Display verbose information")]
     verbose_format: bool,
-    #[arg(short = 's', long, help = "Display information in shell output format")]
+    #[arg(
+        short = 's',
+        long,
+        help = "Display in shell-friendly format for `eval`"
+    )]
     shell_format: bool,
 }
 
@@ -57,7 +52,9 @@ fn main() {
     .count();
 
     if format_flags_count > 1 {
-        eprintln!("jstat: options -l, -r, -s, -x are mutually exclusive");
+        eprintln!(
+            "Error: Options -l, -r, -s, -x are mutually exclusive. Example: jstat -l /path/to/file"
+        );
         process::exit(1);
     }
 
@@ -107,23 +104,13 @@ fn main() {
                             .as_secs() as i64
                     })
                     .unwrap_or(metadata.ctime());
-                
-                
-                let mut atime_local: DateTime<Local> = DateTime::from(
-                    metadata
-                        .accessed()
-                        .unwrap_or_else(|_| SystemTime::UNIX_EPOCH),
-                );
-                let mut mtime_local: DateTime<Local> = DateTime::from(
-                    metadata
-                        .modified()
-                        .unwrap_or_else(|_| SystemTime::UNIX_EPOCH),
-                );
-                let mut btime_local: DateTime<Local> = DateTime::from(
-                    metadata
-                        .created()
-                        .unwrap_or_else(|_| SystemTime::UNIX_EPOCH),
-                );
+
+                let mut atime_local: DateTime<Local> =
+                    DateTime::from(metadata.accessed().unwrap_or(SystemTime::UNIX_EPOCH));
+                let mut mtime_local: DateTime<Local> =
+                    DateTime::from(metadata.modified().unwrap_or(SystemTime::UNIX_EPOCH));
+                let mut btime_local: DateTime<Local> =
+                    DateTime::from(metadata.created().unwrap_or(SystemTime::UNIX_EPOCH));
                 let ctime_utc_for_local = Utc
                     .timestamp_opt(ctime_raw_sec, 0)
                     .single()
@@ -348,7 +335,10 @@ fn main() {
                 }
             }
             Err(e) => {
-                eprintln!("jstat: cannot stat '{}': {}", path_str, e);
+                eprintln!(
+                    "Error: Cannot stat \'{}\': {}. Example: jstat /path/to/valid/file",
+                    path_str, e
+                );
                 overall_exit_code = 1;
             }
         }
