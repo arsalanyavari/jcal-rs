@@ -1,6 +1,6 @@
 use chrono::{DateTime, Datelike, Duration, Local, TimeZone, Utc};
 use clap::Parser;
-use jcal_lib::*;
+use scal_lib::*;
 use std::fs;
 use std::os::unix::fs::FileTypeExt;
 use std::os::unix::fs::MetadataExt;
@@ -12,8 +12,8 @@ use std::time::SystemTime;
 #[command(
     author = "Amir Arsalan Yavari",
     version,
-    about = "Jalali stat displays file or file system status with Jalali dates",
-    name = "jstat"
+    about = "Shamsi (Jalali) stat displays file or file system status with Shamsi (Jalali) dates",
+    name = "sstat"
 )]
 struct Cli {
     #[arg(required = true, num_args = 1.., help = "File(s) or directory(s) to get status of")]
@@ -53,7 +53,7 @@ fn main() {
 
     if format_flags_count > 1 {
         eprintln!(
-            "Error: Options -l, -r, -s, -x are mutually exclusive. Example: jstat -l /path/to/file"
+            "Error: Options -l, -r, -s, -x are mutually exclusive. Example: sstat -l /path/to/file"
         );
         process::exit(1);
     }
@@ -227,7 +227,7 @@ fn main() {
                         path_str
                     );
                 } else {
-                    // Default Jalali format
+                    // Default Shamsi (Jalali) format
                     let (jy_atime, jm_atime, jd_atime) = gregorian_to_jalali(
                         atime_local.year(),
                         atime_local.month(),
@@ -336,7 +336,7 @@ fn main() {
             }
             Err(e) => {
                 eprintln!(
-                    "Error: Cannot stat \'{}\': {}. Example: jstat /path/to/valid/file",
+                    "Error: Cannot stat \'{}\': {}. Example: sstat /path/to/valid/file",
                     path_str, e
                 );
                 overall_exit_code = 1;

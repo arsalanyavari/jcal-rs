@@ -1,7 +1,7 @@
 use chrono::{Datelike, Duration, Local, NaiveDate, NaiveDateTime, TimeZone, Timelike, Utc};
 use chrono_tz::Tz;
 use clap::Parser;
-use jcal_lib::*;
+use scal_lib::*;
 use std::process;
 
 #[derive(Debug)]
@@ -232,8 +232,8 @@ impl TimeAdjustment {
 #[command(
     author = "Amir Arsalan Yavari",
     version,
-    about = "Jalali date like date command",
-    name = "jdate"
+    about = "Shamsi (Jalali) date like date command",
+    name = "sdate"
 )]
 struct Cli {
     // Convert Jalali date (YYYY/MM/DD) to Gregorian
@@ -548,7 +548,7 @@ fn main() {
         }
         (Some(_), Some(_)) => {
             eprintln!(
-                "Error: Please specify only one of -g (Jalali to Gregorian) or -j (Gregorian to Jalali). Example: jdate -g 1379/08/15 or jdate -j 2000/11/05"
+                "Error: Please specify only one of -g (Jalali to Gregorian) or -j (Gregorian to Jalali). Example: sdate -g 1379/08/15 or sdate -j 2000/11/05"
             );
             process::exit(1);
         }

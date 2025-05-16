@@ -1,21 +1,25 @@
 [package]
-name        = "jcal_lib"
-version     = "1.3.0"
+name        = "scal_lib"
+version     = "1.0.0"
 edition     = "2024"
-license     = "MIT"
+license     = "LGPLv3"
 authors     = ["Amir Arsalan Yavari"]
 
 [lib]
-name = "jcal_lib"
+name = "scal_lib"
 path = "src/lib.rs"
 
 [[bin]]
-name = "jcal"
-path = "src/bin/jcal.rs"
+name = "scal"
+path = "src/bin/scal.rs"
 
 [[bin]]
-name = "jdate"
-path = "src/bin/jdate.rs"
+name = "sdate"
+path = "src/bin/sdate.rs"
+
+[[bin]]
+name = "sstat"
+path = "src/bin/sstat.rs"
 
 [dependencies]
 clap   = { version = "4.5.38", features = ["derive"] }

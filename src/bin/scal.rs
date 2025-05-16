@@ -3,21 +3,21 @@
 use chrono::{Datelike, Local};
 use clap::Parser;
 use colored::*;
-use jcal_lib::*;
+use scal_lib::*;
 
 pub const BASE_DAY_CELL_WIDTH: usize = 3;
 pub const JULIAN_DAY_CELL_WIDTH: usize = 4;
 
 pub const MONTHS_PER_ROW: usize = 3;
 pub const COLUMN_SPACING: &str = "  ";
-pub const MAX_DAYS_LINE_WIDTH: usize = JULIAN_DAY_CELL_WIDTH * (jcal_lib::WEEK_DAYS_TOTAL as usize);
+pub const MAX_DAYS_LINE_WIDTH: usize = JULIAN_DAY_CELL_WIDTH * (scal_lib::WEEK_DAYS_TOTAL as usize);
 
 #[derive(Parser)]
 #[command(
     author = "Amir Arsalan Yavari",
     version,
-    about = "Jalali calandar like cal command",
-    name = "jcal"
+    about = "Shamsi (Jalali) calandar like cal command",
+    name = "scal"
 )]
 struct Cli {
     year: Option<i32>,
@@ -49,14 +49,14 @@ fn main() {
 
     if cli.persian_output && cli.english_days {
         eprintln!(
-            "Error: The -p (Persian output) and -e (English output) options cannot be used together. Example: jcal -p 1379 or jcal -e 1379"
+            "Error: The -p (Persian output) and -e (English output) options cannot be used together. Example: scal -p 1379 or scal -e 1379"
         );
         std::process::exit(1);
     }
 
     if cli.current_year_view && cli.year.is_some() {
         eprintln!(
-            "Error: The -y option cannot be used when a specific year is provided. Example: jcal -y"
+            "Error: The -y option cannot be used when a specific year is provided. Example: scal -y"
         );
         std::process::exit(1);
     }
@@ -127,7 +127,7 @@ fn print_month(
     } else {
         BASE_DAY_CELL_WIDTH
     };
-    let current_calendar_width = day_cell_width * (jcal_lib::WEEK_DAYS_TOTAL as usize);
+    let current_calendar_width = day_cell_width * (scal_lib::WEEK_DAYS_TOTAL as usize);
 
     let month_name_str = if config.persian_output_active {
         PERSIAN_MONTH_NAMES[(jm - 1) as usize]
@@ -206,7 +206,7 @@ fn print_month(
         }
 
         col += 1;
-        if col == WEEK_DAYS_TOTAL {
+        if col == scal_lib::WEEK_DAYS_TOTAL {
             col = 0;
             println!();
         }
@@ -229,7 +229,7 @@ fn print_year(
     } else {
         BASE_DAY_CELL_WIDTH
     };
-    let current_month_sub_calendar_width = day_cell_width * (jcal_lib::WEEK_DAYS_TOTAL as usize);
+    let current_month_sub_calendar_width = day_cell_width * (scal_lib::WEEK_DAYS_TOTAL as usize);
     let current_year_header_width = current_month_sub_calendar_width * MONTHS_PER_ROW
         + COLUMN_SPACING.len() * (MONTHS_PER_ROW - 1);
 
@@ -315,7 +315,7 @@ fn print_year(
             current_line.push_str(&formatted_day_part);
 
             col += 1;
-            if col == WEEK_DAYS_TOTAL {
+            if col == scal_lib::WEEK_DAYS_TOTAL {
                 month_lines[m_idx].push(current_line);
                 current_line = String::with_capacity(MAX_DAYS_LINE_WIDTH);
                 col = 0;

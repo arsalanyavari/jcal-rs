@@ -38,7 +38,7 @@ jobs:
         run: |
           cargo build --target ${{ matrix.platform }} --release
           cd target/${{ matrix.platform }}/release/
-          rm -rf $(ls | grep -v -E '^(jcal|jdate)$')
+          rm -rf $(ls | grep -v -E '^(scal|sdate|sstat)$')
           zip -r ${{ matrix.platform }}.zip ./*
 
       - name: Upload File to Assets
@@ -69,7 +69,7 @@ jobs:
         run: |
           cargo build --target ${{ matrix.platform }} --release
           cd target/${{ matrix.platform }}/release/
-          Remove-Item -Recurse -Force $(Get-ChildItem | Where-Object { $_.Name -notin @("jcal.exe", "jdate.exe") })
+          Remove-Item -Recurse -Force $(Get-ChildItem | Where-Object { $_.Name -notin @("scal.exe", "sdate.exe", "sstat.exe") })
           Compress-Archive -Path ./* -DestinationPath ${{ matrix.platform }}.zip -Force
         env:
           RUSTFLAGS: "-C target-feature=+crt-static"
@@ -102,7 +102,7 @@ jobs:
         run: |
           cargo build --target ${{ matrix.platform }} --release
           cd target/${{ matrix.platform }}/release/
-          rm -rf $(ls | grep -v -E '^(jcal|jdate)$')
+          rm -rf $(ls | grep -v -E '^(scal|sdate|sstat)$')
           zip -r ${{ matrix.platform }}.zip ./*
 
       - name: Upload File to Assets

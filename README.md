@@ -1,11 +1,11 @@
-# [Jcal](nongnu.org/jcal) 
+# [Scal](nongnu.org/jcal) 
 
-### Modern Rust implementation of the classic jcal/jdate utilities
+### Modern Rust implementation of the classic scal/sdate utilities
 
-This is the reimplementation of jcal unix command in Rust that originally written by [Ashkan Ghasemi in C](https://github.com/ashkang/jcal)
+This is the reimplementation of scal unix command in Rust that originally written by [Ashkan Ghasemi in C](https://github.com/ashkang/jcal)
 
 > [!Note]
-> I have fixed the bugs in Ashkan's original code related to leap years in the new implementation. However, this version only supports the `jcal` and `jdate` commands with the `-j` and `-g` options for all possible years. The other options have not been implemented yet.
+> I have fixed the bugs in Ashkan's original code related to leap years in the new implementation. However, this version only supports the `scal` and `sdate` commands with the `-j` and `-g` options for all possible years. The other options have not been implemented yet.
 
 # Installation:
 Using pre‑built packages (recommended)
@@ -14,10 +14,10 @@ Head over to the [**Releases**](https://github.com/arsalanyavari/jcal-rs/release
 
 | Distro / OS     | Architecture            | File                                           |
 | --------------- | ----------------------- | ---------------------------------------------- |
-| Debian / Ubuntu | `x86_64`                | `jcal-amd64.deb`                       |
-|                 | `arm64`                 | `jcal-arm64.deb`                       |
-| Fedora / RHEL   | `x86_64`                | `jcal-x86_64.rpm`                    |
-|                 | `arm64`                 | `jcal-aarch64.rpm`                   |
+| Debian / Ubuntu | `x86_64`                | `scal-amd64.deb`                       |
+|                 | `arm64`                 | `scal-arm64.deb`                       |
+| Fedora / RHEL   | `x86_64`                | `scal-x86_64.rpm`                    |
+|                 | `arm64`                 | `scal-aarch64.rpm`                   |
 | Linux (any)     | `x86_64`, `arm64`       | `<arch>-unknown-linux-gnu.zip` |
 | Windows 10+     | `x86_64`                | `x86_64-pc-windows-gnu.zip`      |
 | macOS 11+       | `arm64` (Apple Silicon) | `aarch64-apple-darwin.zip`        |
@@ -26,15 +26,15 @@ Head over to the [**Releases**](https://github.com/arsalanyavari/jcal-rs/release
 If you download Linux packages:
 ```bash
 # Debian / Ubuntu
-sudo dpkg -i jcal-*.deb
-sudo dpkg -i jdate-*.deb
+sudo dpkg -i scal-*.deb
+sudo dpkg -i sdate-*.deb
 
 # Fedora / RHEL
-sudo rpm -i jcal-*.rpm
-sudo rpm -i jdate-*.rpm
+sudo rpm -i scal-*.rpm
+sudo rpm -i sdate-*.rpm
 ```
 If you download zip file:
-unzip the file then put `jcal` and `jdate` in executable PATH or run then relative (`./jcal` or `./jdate`)
+unzip the file then put `scal` and `sdate` in executable PATH or run then relative (`./scal` or `./sdate`)
 
 ## Building From Source:
 ```bash
@@ -46,17 +46,17 @@ cd jcal-rs
 ```bash
 cargo build --release
 ```
-- $ **jcal** or **jdate** in `target/release/` path
+- $ **scal** or **sdate** in `target/release/` path
 
 <br>
 
-### jcal is Jalali calendar like cal command
+### scal is Shamsi (Jalali) calendar like cal command
 ```bash
-$ jcal -h
-Usage: jcal [OPTIONS] [YEAR]
+$ scal -h
+Usage: scal [OPTIONS] [YEAR]
 
 Arguments:
-  [YEAR]  Jalali year to display (defaults to current)
+  [YEAR]  Shamsi (Jalali) year to display (defaults to current)
 
 Options:
   -P, --pahlavi            Display year based on Pahlavi era
@@ -68,14 +68,14 @@ Options:
   -V, --version            Show version information
 ```
 
-### jdate Converts between Jalali and Gregorian dates
+### sdate Converts between Shamsi (Jalali) and Gregorian dates
 ```bash
-$ jdate -h
-Usage: jdate [OPTIONS]
+$ sdate -h
+Usage: sdate [OPTIONS]
 
 Options:
-  -g, --jalali-to-gregorian <YYYY/MM/DD>
-  -j, --gregorian-to-jalali <YYYY/MM/DD>
+  -g, --jalali-to-gregorian <YYYY/MM/DD>    Convert Shamsi (Jalali) to Gregorian date
+  -j, --gregorian-to-jalali <YYYY/MM/DD>    Convert Gregorian to Shamsi (Jalali) date
   -h, --help                              Print help
   -V, --version                           Show version information
 ```
@@ -99,16 +99,16 @@ Options:
 </table>
 
 ```bash
-$ jcal                  # current Jalali month
-$ jcal -h               # jcal help
-$ jcal -y               # whole current year
-$ jcal 1403             # year 1403
-$ jcal -p -e 1303       # 1303 with Persian digits & English weekdays
-$ jcal 404 -P           # year 404 in Pahlavi format (1584 Pahlavi)
-$ jcal -j 1398 -e -P    # year 1398 in Pahlavi format with English weekdays and dayes numbers starting from 1 Farvardin
-$ jdate -g 1404/01/01   # convert 1404/01/01 to 2025/03/21
-$ jdate -j 2025/12/31   # convert 2025/12/31 to 1404/10/10
-$ jdate -h              # jdate help
+$ scal                  # current Shamsi (Jalali) month
+$ scal -h               # scal help
+$ scal -y               # whole current year
+$ scal 1403             # year 1403
+$ scal -p -e 1303       # 1303 with Persian digits & English weekdays
+$ scal 404 -P           # year 404 in Pahlavi format (1584 Pahlavi)
+$ scal -j 1398 -e -P    # year 1398 in Pahlavi format with English weekdays and dayes numbers starting from 1 Farvardin
+$ sdate -g 1404/01/01   # convert 1404/01/01 to 2025/03/21
+$ sdate -j 2025/12/31   # convert 2025/12/31 to 1404/10/10
+$ sdate -h              # sdate help
 ```
 
 ## Contributing

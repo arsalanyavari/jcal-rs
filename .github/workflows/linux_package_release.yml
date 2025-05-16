@@ -42,7 +42,7 @@ jobs:
 
       - name: Create DEB packages
         run: |
-          for app in jcal jdate; do
+          for app in scal sdate sstat; do
             fpm -s dir -t deb \
               -n $app \
               -v ${{ github.ref_name }} \
@@ -51,11 +51,11 @@ jobs:
               --description "$app application" \
               --package $app-${{ matrix.deb_arch }}.deb \
               ./target/${{ matrix.target }}/release/$app=/usr/bin/$app
-            done
+          done
 
       - name: Create RPM packages
         run: |
-          for app in jcal jdate; do
+          for app in scal sdate sstat; do
             fpm -s dir -t rpm \
               -n $app \
               -v ${{ github.ref_name }} \
