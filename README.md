@@ -39,13 +39,13 @@ If you download zip file:
 unzip the file then put `scal`, `sdate` and `sstat` in executable PATH or run then relative (`./scal`, `./sdate` or `./sstat`)
 
 ## Building From Source:
-```bash
+```
 git clone https://github.com/arsalanyavari/scal.git
 ```
-```bash
+```
 cd scal
 ```
-```bash
+```
 cargo build --release
 ```
 - $ **scal** or **sdate** in `target/release/` path
@@ -53,7 +53,7 @@ cargo build --release
 <br>
 
 ### scal is Shamsi (Jalali) calendar like cal command
-```bash
+```
 $ scal -h
 Usage: scal [OPTIONS] [YEAR]
 
@@ -71,7 +71,7 @@ Options:
 ```
 
 ### sdate Converts between Shamsi (Jalali) and Gregorian dates
-```bash
+```
 $ sdate -h
 Usage: sdate [OPTIONS]
 
@@ -88,7 +88,7 @@ Options:
 ```
 
 ### sstat shows the stats of file in Shamsi (Jalali)
-```bash
+```
 $ sstat -h
 Usage: sstat [OPTIONS] <PATHS>...
 
@@ -108,21 +108,28 @@ Options:
 
 ## Screenshots
 
-<table class="table">
-  <tbody>
-    <tr>
-      <td>
-        <img src="https://github.com/user-attachments/assets/54c4707c-99f2-46aa-a719-aa5cd4863d29" width="100%" alt="images">
-      </td>
-      <td>
-        <img src="https://github.com/user-attachments/assets/b6bfc131-12ad-4d29-bfcf-a88af05eb6ab" width="100%" alt="images">
-      </td>
-      <td>
-        <img src="https://github.com/user-attachments/assets/21e11bc7-ce58-481a-9e7d-ac55c40cfee3" width="100%" alt="images">
-      </td>
-    </tr>
-  </tbody>
+<table>
+  <tr>
+    <td rowspan="3" width="35%">
+      <img src="https://github.com/user-attachments/assets/4c9b78f3-d855-4870-94e2-d118d5ea6f5c" width="100%" alt="scal example">
+    </td>
+    <td width="50%">
+      <img src="https://github.com/user-attachments/assets/53f3f630-fe8e-49dc-8c11-43719afc6179" width="60%" alt="scal example">
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="https://github.com/user-attachments/assets/bfa719c7-7daf-466b-b7e0-7f5c1bb9e6cf" width="67%" alt="sdate example">
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="https://github.com/user-attachments/assets/c7d4836d-9212-4f65-a806-4fce4ef018ce" width="100%" alt="sstat example">
+    </td>
+  </tr>
 </table>
+
+## Example
 
 ```bash
 $ scal                  # current Shamsi (Jalali) month
