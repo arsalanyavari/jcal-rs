@@ -1,0 +1,76 @@
+.\" Manpage for sstat
+.\" Contact arya48.yavari79@gmail.com to correct errors or typos.
+.TH sstat 1 "May 2025" "sstat 1.0.0" "User Commands"
+
+.SH NAME
+sstat \- display file or file system status in Shamsi (Jalali)
+
+.SH SYNOPSIS
+.B sstat
+[\fIOPTIONS\fR] <\fIPATHS\fR>...
+
+.SH DESCRIPTION
+.B sstat
+displays information about the specified file(s) or directory(s), with timestamps converted to the Shamsi (Jalali) calendar.
+It is part of the modern Rust implementation of the classic jcal utilities, aiming to provide functionality similar to \fBstat\fR(1) but with Jalali dates.
+
+.SH OPTIONS
+.TP
+\fB-p, --persian-output\fR
+Display Farsi numbers and names for dates.
+.TP
+\fB-l, --ls-format\fR
+Display in a format similar to \fBls -lT\fR. This shows detailed information including permissions, owner, group, size, and last modification time.
+.TP
+\fB-n, --no-newline\fR
+Do not print a trailing newline character after the output.
+.TP
+\fB-r, --raw-format\fR
+Display raw numerical information (e.g., timestamps as Unix epochs) without Shamsi conversion for dates.
+.TP
+\fB-x, --verbose-format\fR
+Display verbose information about the file, including access, modification, and change times in Shamsi.
+.TP
+\fB-s, --shell-format\fR
+Display information in a shell-friendly format, suitable for use with `eval`.
+.TP
+\fB-h, --help\fR
+Print help information.
+.TP
+\fB-V, --version\fR
+Print version information.
+
+.SH ARGUMENTS
+.TP
+<\fIPATHS\fR>...
+One or more file or directory paths to get the status of.
+
+.SH EXAMPLES
+.TP
+.B sstat /path/to/file
+Show the status of /path/to/file with Shamsi dates.
+.TP
+.B sstat -l /path/to/directory
+Display detailed information for /path/to/directory in `ls -lT` like format with Shamsi dates.
+.TP
+.B sstat -x file1 file2
+Display verbose status information for file1 and file2 with Shamsi dates.
+.TP
+.B sstat -p *.txt
+Display status for all .txt files in the current directory with Persian numbers and names for dates.
+
+.SH AUTHOR
+Written by Amir Arsalan Yavari.
+
+.SH REPORTING BUGS
+Report bugs to <https://github.com/arsalanyavari/scal/issues>.
+
+.SH COPYRIGHT
+Copyright © Amir Arsalan Yavari. License LGPLv3.
+
+.SH SEE ALSO
+.BR stat (1),
+.BR ls (1),
+.BR scal (1),
+.BR sdate (1),
+.BR slib (3) 

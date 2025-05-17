@@ -1,0 +1,73 @@
+.\" Manpage for scal
+.\" Contact arya48.yavari79@gmail.com to correct errors or typos.
+.TH scal 1 "May 2025" "scal 1.0.0" "User Commands"
+
+.SH NAME
+scal \- Shamsi (Jalali) calendar
+
+.SH SYNOPSIS
+.B scal
+[\fIOPTIONS\fR] [\fIYEAR\fR]
+
+.SH DESCRIPTION
+.B scal
+displays a Shamsi (Jalali) calendar, similar to the standard Unix \fBcal\fR command.
+It is a modern Rust implementation of the classic jcal utilities.
+If no arguments are specified, the current month is displayed.
+If a year is specified, the calendar for that entire year is displayed.
+
+.SH OPTIONS
+.TP
+\fB-P, --pahlavi\fR
+Display year based on Pahlavi year.
+.TP
+\fB-p, --persian-output\fR
+Display Farsi numbers and names.
+.TP
+\fB-e, --english-days\fR
+Display English weekday names (Sa, Su, ...).
+.TP
+\fB-y, --current-year-view\fR
+Display the calendar for the current year.
+.TP
+\fB-j, --julian-days\fR
+Display Julian dates (day of year).
+.TP
+\fB-h, --help\fR
+Print help information.
+.TP
+\fB-V, --version\fR
+Print version information.
+
+.SH EXAMPLES
+.TP
+.B scal
+Display the current Shamsi (Jalali) month.
+.TP
+.B scal -y
+Display the calendar for the whole current year.
+.TP
+.B scal 1403
+Display the calendar for the Shamsi year 1403.
+.TP
+.B scal 404 -P
+Display the calendar for year 404 in Pahlavi format (e.g., 1584 Pahlavi).
+.TP
+.B scal -j 1398 -e -P
+Display the calendar for Shamsi year 1398 in Pahlavi format with English weekdays and Julian day numbers (days starting from 1 Farvardin).
+
+.SH AUTHOR
+Written by Amir Arsalan Yavari. Based on the original C implementation of jcal by Ashkan Ghasemi.
+
+.SH REPORTING BUGS
+Report bugs to <https://github.com/arsalanyavari/scal/issues>.
+
+.SH COPYRIGHT
+Copyright © Amir Arsalan Yavari. License LGPLv3.
+This is free software: you are free to change and redistribute it.
+
+.SH SEE ALSO
+.BR cal (1),
+.BR sdate (1),
+.BR sstat (1),
+.BR slib (3) 

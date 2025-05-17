@@ -1,0 +1,78 @@
+.\" Manpage for sdate
+.\" Contact arya48.yavari79@gmail.com to correct errors or typos.
+.TH sdate 1 "May 2025" "sdate 1.0.0" "User Commands"
+
+.SH NAME
+sdate \- Converts between Shamsi (Jalali) and Gregorian dates
+
+.SH SYNOPSIS
+.B sdate
+[\fIOPTIONS\fR]
+
+.SH DESCRIPTION
+.B sdate
+converts dates between Shamsi (Jalali) and Gregorian calendar systems. It can also display the current date and time in various formats and timezones, and perform date adjustments.
+It is part of the modern Rust implementation of the classic jcal utilities.
+
+.SH OPTIONS
+.TP
+\fB-g, --jalali-to-gregorian\fR <YYYY/MM/DD>
+Convert the given Shamsi (Jalali) date to Gregorian date.
+.TP
+\fB-j, --gregorian-to-jalali\fR <YYYY/MM/DD>
+Convert the given Gregorian date to Shamsi (Jalali) date.
+.TP
+\fB-u, --utc\fR
+Display time in UTC.
+.TP
+\fB-z, --timezone\fR <TIMEZONE>
+Set a specific timezone for display (e.g., "America/New_York", "Europe/London").
+.TP
+\fB-R, --rfc2822\fR
+Output the date and time in RFC 2822 format.
+.TP
+\fB-I, --iso8601\fR[=<PRECISION>]
+Output the date and time in ISO 8601 format. Optional precision can be 'date', 'hour', 'minute', 'second', or 'millisecond'.
+.TP
+\fB-v, --adjustments\fR <[+|-]val[y|m|w|d|H|M|S]>
+Adjust the current date/time. Examples: `+1y` (add 1 year), `-2m` (subtract 2 months), `+3w` (add 3 weeks), `-10d` (subtract 10 days), `+5H` (add 5 hours), `-30M` (subtract 30 minutes), `+15S` (add 15 seconds). Multiple adjustments can be chained.
+.TP
+\fB-h, --help\fR
+Print help information.
+.TP
+\fB-V, --version\fR
+Print version information.
+
+.SH EXAMPLES
+.TP
+.B sdate
+Display the current date and time in default Shamsi (Jalali) format.
+.TP
+.B sdate -g 1404/01/01
+Convert Shamsi date 1404/01/01 to Gregorian (Output: 2025/03/21 or similar, depending on locale and time).
+.TP
+.B sdate -j 2025/12/31
+Convert Gregorian date 2025/12/31 to Shamsi (Output: 1404/10/10 or similar).
+.TP
+.B sdate -u -I=second
+Display the current date and time in UTC, ISO 8601 format with second precision.
+.TP
+.B sdate -v +1y -v -2m -v +3d
+Display the date one year, minus two months, plus three days from now.
+
+.SH AUTHOR
+Written by Amir Arsalan Yavari. Based on the original C implementation of jdate by Ashkan Ghasemi.
+
+.SH REPORTING BUGS
+Report bugs to <https://github.com/arsalanyavari/scal/issues>.
+
+.SH COPYRIGHT
+Copyright © Amir Arsalan Yavari. License LGPLv3.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+.SH SEE ALSO
+.BR date (1),
+.BR scal (1),
+.BR sstat (1),
+.BR slib (3) 
